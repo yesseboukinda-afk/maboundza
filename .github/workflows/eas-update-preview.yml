@@ -1,0 +1,35 @@
+name: Publish EAS preview update
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eas-update-preview
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish preview update
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Publish EAS Update
+        run: npx eas-cli update --channel preview --message "GitHub main: ${{ github.sha }}" --environment preview --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}

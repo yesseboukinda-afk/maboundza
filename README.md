@@ -116,6 +116,9 @@ npx eas update --channel preview --message "Description de la mise à jour" --en
 
 L’application télécharge la mise à jour compatible et l’applique au prochain lancement. N’envoyez pas de mise à jour `production` avant de l’avoir validée sur `preview`.
 
+#### Publication automatique depuis GitHub
+Le workflow GitHub Actions publie une mise à jour `preview` à chaque push sur la branche `main`. Ajoutez un jeton Expo dans les secrets du dépôt GitHub sous **Settings > Secrets and variables > Actions > New repository secret**, avec le nom `EXPO_TOKEN`. Créez le jeton depuis les paramètres de compte Expo et ne le mettez jamais dans le code ou dans `.env`.
+
 Pour le développement natif avec un serveur local, compilez le profil `development`, puis lancez :
 ```bash
 npx eas build --platform android --profile development
