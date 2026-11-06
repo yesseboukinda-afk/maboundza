@@ -36,6 +36,6 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Publish EAS Update
-        run: npx eas-cli update --channel preview --message "GitHub main: ${{ github.sha }}" --environment preview --non-interactive
+        run: 'npx eas-cli update --channel preview --message "GitHub main: ${{ github.sha }}" --environment preview --non-interactive'
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
