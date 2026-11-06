@@ -1,14 +1,16 @@
 import {
   getLocalDatabase,
   getLocalHerbariumEntries,
+  replaceLocalPublishedPlants,
   saveLocalHerbariumEntry,
-  savePlantToLocalCache,
 } from '@/database/sqlite';
 import { database, storage } from '@/services/firebase';
 import { get, onValue, ref, set } from 'firebase/database';
 import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage';
 import * as FileSystem from 'expo-file-system/legacy';
 import { HerbariumEntry, Plant } from '@/types';
+
+let hasWarnedPlantsPermission = false;
 
 export interface PendingSyncItem {
   id: string;
@@ -89,26 +91,47 @@ export async function processSyncQueue(userId: string): Promise<{ processedCount
   return { processedCount: queue.length, successCount };
 }
 
-export function subscribeToAccountData(userId: string): () => void {
+export function subscribeToPublishedPlants(): () => void {
   if (!database) {
     return () => {};
   }
 
-  const unsubscribePlants = onValue(
+  return onValue(
     ref(database, 'plants'),
     (snapshot) => {
-      if (!snapshot.exists()) {
-        return;
-      }
-
-      const plants = Object.values(snapshot.val() as Record<string, Plant>)
-        .filter((plant) => plant.is_published);
-      void Promise.all(plants.map(savePlantToLocalCache)).catch((error: unknown) => {
+      const records = snapshot.exists()
+        ? Object.entries(snapshot.val() as Record<string, Plant>)
+        : [];
+      const plants = records
+        .filter(([, plant]) => plant?.is_published === true)
+        .map(([id, plant]) => ({ ...plant, id: plant.id || id }));
+      void replaceLocalPublishedPlants(plants).catch((error: unknown) => {
         console.error('Unable to cache botanical records for offline use:', error);
       });
     },
-    (error) => console.error('Unable to synchronize botanical records:', error)
+    (error) => {
+      if (isFirebasePermissionDenied(error)) {
+        if (!hasWarnedPlantsPermission) {
+          hasWarnedPlantsPermission = true;
+          console.warn(
+            'Firebase denied reading /plants. The local rules allow public reads; deploy firebase/database.rules.json to the same Firebase project configured in the app.'
+          );
+        }
+        return;
+      }
+      console.error('Unable to synchronize botanical records:', error);
+    }
   );
+}
+
+function isFirebasePermissionDenied(error: Error & { code?: string }): boolean {
+  return error.code === 'PERMISSION_DENIED' || /permission_denied/i.test(error.message);
+}
+
+export function subscribeToAccountData(userId: string): () => void {
+  if (!database) {
+    return () => {};
+  }
 
   const unsubscribeHerbarium = onValue(
     ref(database, `herbarium_entries/${userId}`),
@@ -124,9 +147,7 @@ export function subscribeToAccountData(userId: string): () => void {
     },
     (error) => console.error('Unable to synchronize herbarium entries:', error)
   );
-
   return () => {
-    unsubscribePlants();
     unsubscribeHerbarium();
   };
 }

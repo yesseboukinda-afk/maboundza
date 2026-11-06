@@ -6,111 +6,134 @@ import { Colors } from '@/src/theme/colors';
 import { Typography } from '@/src/theme/typography';
 import { useAuthStore } from '@/src/store/authStore';
 
+const QUICK_LINKS = [
+  {
+    title: 'Encyclopédie',
+    subtitle: 'Explorer les plantes',
+    icon: 'book-outline',
+    color: Colors.lightGreen,
+    route: '/(main)/encyclopedia',
+  },
+  {
+    title: 'Mon herbier',
+    subtitle: 'Mes observations',
+    icon: 'leaf-outline',
+    color: '#F6E8CE',
+    route: '/(main)/herbarium',
+  },
+  {
+    title: 'Petit botaniste',
+    subtitle: 'Apprendre en jouant',
+    icon: 'sparkles-outline',
+    color: '#F8E9AC',
+    route: '/kids',
+  },
+] as const;
+
 export default function HomeScreen() {
   const router = useRouter();
-  const { user, role, subscriptionTier, scansUsedToday, maxScansAllowed } = useAuthStore();
+  const { user, scansUsedToday, maxScansAllowed } = useAuthStore();
+  const firstName = user?.first_name || user?.display_name?.split(' ')[0] || 'Botaniste';
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* User Greeting Card */}
-      <View style={styles.welcomeCard}>
-        <View style={styles.welcomeLeft}>
-          <Text style={styles.greetingTitle}>
-            Mbolo, {user?.first_name || 'Botaniste'}
-          </Text>
-          <Text style={styles.greetingSubtitle}>
-            Explorez les fiches botaniques disponibles dans l’encyclopédie
-          </Text>
-          <View style={styles.roleBadge}>
-            <Text style={styles.roleText}>Rôle: {role.toUpperCase()}</Text>
-          </View>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.greetingRow}>
+        <View style={styles.greetingCopy}>
+          <Text style={styles.eyebrow}>MABOUNDZA · FLORE DU GABON</Text>
+          <Text style={styles.greetingTitle}>Mbolo, {firstName}</Text>
+          <Text style={styles.greetingSubtitle}>La nature gabonaise à portée de main.</Text>
         </View>
         <View style={styles.avatarCircle}>
-          <Ionicons name="leaf-outline" size={30} color={Colors.white} />
+          <Ionicons name="leaf" size={23} color={Colors.white} />
         </View>
       </View>
 
-      {/* Quick Scanner Hero Card */}
-      <View style={styles.scannerHeroCard}>
-        <View style={styles.scannerHeroHeader}>
-          <Text style={styles.scannerHeroTitle}>Scanner botanique</Text>
+      <TouchableOpacity
+        style={styles.scannerCard}
+        onPress={() => router.push('/(main)/scanner')}
+        accessibilityRole="button"
+      >
+        <View style={styles.scannerIcon}>
+          <Ionicons name="camera-outline" size={23} color={Colors.forestGreen} />
+        </View>
+        <View style={styles.scannerCopy}>
+          <Text style={styles.scannerTitle}>Observer une plante</Text>
+          <Text style={styles.scannerSubtitle}>
+            Photographiez-la pour garder sa trace dans votre herbier.
+          </Text>
           <Text style={styles.scanCounter}>
-            {scansUsedToday} / {maxScansAllowed === 9999 ? '∞' : maxScansAllowed} scans aujourd'hui
+            {scansUsedToday} / {maxScansAllowed === 9999 ? '∞' : maxScansAllowed} observations aujourd’hui
           </Text>
         </View>
-        <Text style={styles.scannerHeroDesc}>
-          Photographiez une plante pour enregistrer votre observation. L’identification automatique sera disponible lorsqu’un modèle botanique sera configuré.
-        </Text>
+        <View style={styles.scannerArrow}>
+          <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+        </View>
+      </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.scanHeroBtn}
-          onPress={() => router.push('/(main)/scanner')}
-        >
-          <Ionicons name="camera-outline" size={20} color={Colors.white} />
-          <Text style={styles.scanHeroBtnText}>Ouvrir le scanner</Text>
-        </TouchableOpacity>
+      <View style={styles.sectionHeading}>
+        <Text style={styles.sectionTitle}>Explorer</Text>
+        <Text style={styles.sectionCaption}>Découvrez MABOUNDZA</Text>
       </View>
 
-      {/* Specialty Modes Shortcuts */}
-      <Text style={styles.sectionTitle}>Espaces & Modes Dédiés</Text>
-
-      <View style={styles.modesGrid}>
-        {/* Petit Botaniste */}
-        <TouchableOpacity
-          style={[styles.modeCard, { backgroundColor: Colors.sunYellow }]}
-          onPress={() => router.push('/kids')}
-        >
-          <Ionicons name="leaf-outline" size={28} color={Colors.forestGreen} style={styles.modeIcon} />
-          <Text style={styles.modeTitle}>Petit Botaniste</Text>
-          <Text style={styles.modeDesc}>Jeux & Quizzes avec Léo le Gorille (3-15 ans)</Text>
-        </TouchableOpacity>
-
-        {/* Assistant Maman MABOUNDZA */}
-        <TouchableOpacity
-          style={[styles.modeCard, { backgroundColor: Colors.lightGreen }]}
-          onPress={() => router.push('/assistant')}
-        >
-          <Ionicons name="chatbubbles-outline" size={28} color={Colors.forestGreen} style={styles.modeIcon} />
-          <Text style={styles.modeTitle}>Maman MABOUNDZA</Text>
-          <Text style={styles.modeDesc}>Assistant IA Vocal & Conseils Validés</Text>
-        </TouchableOpacity>
-
-        {/* Mode École */}
-        <TouchableOpacity
-          style={[styles.modeCard, { backgroundColor: Colors.naturalBeige }]}
-          onPress={() => router.push('/school')}
-        >
-          <Ionicons name="school-outline" size={28} color={Colors.forestGreen} style={styles.modeIcon} />
-          <Text style={styles.modeTitle}>Mode École</Text>
-          <Text style={styles.modeDesc}>Espace Enseignant & Gestion des Classes</Text>
-        </TouchableOpacity>
-
-        {/* Mode Famille */}
-        <TouchableOpacity
-          style={[styles.modeCard, { backgroundColor: Colors.naturalBeige }]}
-          onPress={() => router.push('/family')}
-        >
-          <Ionicons name="people-outline" size={28} color={Colors.forestGreen} style={styles.modeIcon} />
-          <Text style={styles.modeTitle}>Mode Famille</Text>
-          <Text style={styles.modeDesc}>Partage d'observations & Contes traditionnels</Text>
-        </TouchableOpacity>
+      <View style={styles.quickLinks}>
+        {QUICK_LINKS.map((link) => (
+          <TouchableOpacity
+            key={link.title}
+            style={styles.quickLink}
+            onPress={() => router.push(link.route)}
+            accessibilityRole="button"
+          >
+            <View style={[styles.quickLinkIcon, { backgroundColor: link.color }]}>
+              <Ionicons name={link.icon} size={22} color={Colors.forestGreen} />
+            </View>
+            <Text style={styles.quickLinkTitle} numberOfLines={1}>{link.title}</Text>
+            <Text style={styles.quickLinkSubtitle} numberOfLines={2}>{link.subtitle}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      <Text style={styles.sectionTitle}>Encyclopédie botanique</Text>
-      <View style={styles.plantCard}>
-        <Text style={styles.plantDesc}>
-          Les fiches botaniques vérifiées apparaîtront ici après leur ajout à la base de données.
-        </Text>
-        <TouchableOpacity onPress={() => router.push('/encyclopedia')}>
-          <Text style={styles.readMoreText}>Consulter l'encyclopédie</Text>
-        </TouchableOpacity>
+      <View style={styles.sectionHeading}>
+        <Text style={styles.sectionTitle}>Pour apprendre et partager</Text>
       </View>
 
-      {/* Medical Safety Disclaimer */}
-      <View style={styles.safetyBanner}>
-        <Ionicons name="warning-outline" size={24} color={Colors.safetyRed} />
-        <Text style={styles.safetyBannerText}>
-          **Avertissement Médical Obligatoire :** Les informations botaniques et traditionnelles fournies ne remplacent jamais un avis médical. En cas de malaise, consultez un professionnel de santé.
+      <TouchableOpacity
+        style={styles.featureRow}
+        onPress={() => router.push('/school')}
+        accessibilityRole="button"
+      >
+        <View style={[styles.featureIcon, { backgroundColor: '#E8EEF8' }]}>
+          <Ionicons name="school-outline" size={21} color={Colors.forestGreen} />
+        </View>
+        <View style={styles.featureCopy}>
+          <Text style={styles.featureTitle}>Espace École</Text>
+          <Text style={styles.featureSubtitle}>Des activités botaniques pour la classe</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={19} color={Colors.textMuted} />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.featureRow}
+        onPress={() => router.push('/family')}
+        accessibilityRole="button"
+      >
+        <View style={[styles.featureIcon, { backgroundColor: '#F6E8CE' }]}>
+          <Ionicons name="people-outline" size={21} color={Colors.forestGreen} />
+        </View>
+        <View style={styles.featureCopy}>
+          <Text style={styles.featureTitle}>Espace Famille</Text>
+          <Text style={styles.featureSubtitle}>Partager les découvertes de la nature</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={19} color={Colors.textMuted} />
+      </TouchableOpacity>
+
+      <View style={styles.safetyNote}>
+        <Ionicons name="information-circle-outline" size={18} color={Colors.ochre} />
+        <Text style={styles.safetyNoteText}>
+          Les informations de l’application ne remplacent pas un avis médical.
         </Text>
       </View>
     </ScrollView>
@@ -123,165 +146,184 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.naturalBeige,
   },
   content: {
-    padding: 16,
-    paddingBottom: 32,
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 28,
   },
-  welcomeCard: {
-    backgroundColor: Colors.forestGreen,
-    borderRadius: 16,
-    padding: 18,
+  greetingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 18,
   },
-  welcomeLeft: {
+  greetingCopy: {
     flex: 1,
+  },
+  eyebrow: {
+    color: Colors.primaryGreen,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginBottom: 4,
   },
   greetingTitle: {
     ...Typography.header2,
-    color: Colors.white,
+    color: Colors.forestGreen,
   },
   greetingSubtitle: {
     ...Typography.caption,
-    color: Colors.naturalBeige,
-    marginTop: 4,
-    opacity: 0.9,
-  },
-  roleBadge: {
-    backgroundColor: Colors.ochre,
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginTop: 10,
-  },
-  roleText: {
-    color: Colors.white,
-    fontSize: 10,
-    fontWeight: '700',
+    color: Colors.textSecondary,
+    marginTop: 2,
   },
   avatarCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: Colors.lightGreen,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.forestGreen,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 12,
   },
-  scannerHeroCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    shadowColor: Colors.forestGreen,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  scannerHeroHeader: {
+  scannerCard: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: Colors.forestGreen,
+    borderRadius: 18,
+    padding: 14,
+    marginBottom: 22,
   },
-  scannerHeroTitle: {
-    ...Typography.header3,
-    color: Colors.forestGreen,
-  },
-  scanCounter: {
-    ...Typography.caption,
-    color: Colors.primaryGreen,
-    fontWeight: '700',
-  },
-  scannerHeroDesc: {
-    ...Typography.body,
-    fontSize: 13,
-    color: Colors.textSecondary,
-    marginTop: 6,
-    marginBottom: 14,
-  },
-  scanHeroBtn: {
-    backgroundColor: Colors.primaryGreen,
-    borderRadius: 12,
-    paddingVertical: 12,
+  scannerIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: Colors.lightGreen,
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 8,
+    marginRight: 12,
   },
-  scanHeroBtnText: {
+  scannerCopy: {
+    flex: 1,
+  },
+  scannerTitle: {
     ...Typography.bodyBold,
     color: Colors.white,
   },
+  scannerSubtitle: {
+    ...Typography.caption,
+    color: Colors.naturalBeige,
+    fontSize: 11,
+    lineHeight: 15,
+    marginTop: 2,
+    opacity: 0.9,
+  },
+  scanCounter: {
+    color: Colors.lightGreen,
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 5,
+  },
+  scannerArrow: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: Colors.primaryGreen,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  sectionHeading: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
   sectionTitle: {
     ...Typography.header3,
+    fontSize: 16,
     color: Colors.darkGray,
-    marginBottom: 12,
-    marginTop: 4,
   },
-  modesGrid: {
+  sectionCaption: {
+    ...Typography.caption,
+    fontSize: 11,
+    color: Colors.textMuted,
+  },
+  quickLinks: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 20,
+    gap: 9,
+    marginBottom: 22,
   },
-  modeCard: {
-    width: '48%',
-    borderRadius: 14,
-    padding: 14,
+  quickLink: {
+    flex: 1,
+    minHeight: 112,
+    padding: 10,
+    backgroundColor: Colors.white,
+    borderRadius: 15,
     borderWidth: 1,
     borderColor: Colors.borderLight,
   },
-  modeIcon: {
-    marginBottom: 6,
+  quickLinkIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
   },
-  modeTitle: {
+  quickLinkTitle: {
+    ...Typography.caption,
+    fontWeight: '700',
+    color: Colors.darkGray,
+  },
+  quickLinkSubtitle: {
+    color: Colors.textMuted,
+    fontSize: 10,
+    lineHeight: 14,
+    marginTop: 2,
+  },
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 8,
+  },
+  featureIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 11,
+  },
+  featureCopy: {
+    flex: 1,
+  },
+  featureTitle: {
     ...Typography.bodyBold,
     fontSize: 14,
     color: Colors.darkGray,
   },
-  modeDesc: {
+  featureSubtitle: {
     ...Typography.caption,
     fontSize: 11,
-    color: Colors.textSecondary,
-    marginTop: 4,
+    color: Colors.textMuted,
+    marginTop: 1,
   },
-  plantCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-  },
-  plantDesc: {
-    ...Typography.body,
-    fontSize: 13,
-    color: Colors.textSecondary,
-  },
-  readMoreText: {
-    ...Typography.caption,
-    color: Colors.primaryGreen,
-    fontWeight: '700',
-  },
-  safetyBanner: {
-    backgroundColor: '#FDEDEC',
-    borderRadius: 12,
-    padding: 14,
-    borderColor: Colors.safetyRed,
-    borderWidth: 1,
+  safetyNote: {
     flexDirection: 'row',
-    gap: 10,
     alignItems: 'center',
+    gap: 7,
+    marginTop: 8,
+    paddingHorizontal: 2,
   },
-  safetyBannerText: {
+  safetyNoteText: {
     ...Typography.caption,
-    color: Colors.safetyRed,
     flex: 1,
-    lineHeight: 18,
+    fontSize: 11,
+    color: Colors.textSecondary,
   },
 });

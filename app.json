@@ -10,6 +10,12 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "updates": {
+      "url": "https://u.expo.dev/33e5403c-40dc-42a7-9a91-a72983064272"
+    },
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "ga.maboundza.app",
@@ -62,7 +68,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#173D2D"
         }
-      ]
+      ],
+      "expo-background-task"
     ],
     "experiments": {
       "typedRoutes": true

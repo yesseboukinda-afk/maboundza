@@ -1,26 +1,80 @@
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { Tabs } from 'expo-router';
-import { View, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/src/theme/colors';
+
+const TAB_ITEMS = {
+  index: { label: 'Accueil', icon: 'home-outline' },
+  scanner: { label: 'Scanner', icon: 'camera-outline' },
+  encyclopedia: { label: 'Encyclopédie', icon: 'book-outline' },
+  herbarium: { label: 'Herbier', icon: 'leaf-outline' },
+  profile: { label: 'Profil', icon: 'person-outline' },
+} as const;
+const TAB_ORDER = ['index', 'scanner', 'encyclopedia', 'herbarium', 'profile'] as const;
+
+type FloatingTabBarProps = Parameters<
+  NonNullable<ComponentProps<typeof Tabs>['tabBar']>
+>[0];
+
+function FloatingTabBar({ state, descriptors, insets, navigateToTab }: FloatingTabBarProps) {
+  return (
+    <View style={[styles.tabBarOuter, { paddingBottom: Math.max(insets.bottom, 8) }]}>
+      <View style={styles.tabBar}>
+        {state.routes.map((route, index) => {
+          const normalizedRouteName = route.name
+            .replace(/\([^)]*\)\/?/g, '')
+            .replace(/\/index$/, '') || 'index';
+          const tabKey = normalizedRouteName in TAB_ITEMS
+            ? normalizedRouteName as keyof typeof TAB_ITEMS
+            : TAB_ORDER[index];
+          const item = TAB_ITEMS[tabKey];
+          const { options } = descriptors[route.key];
+          const focused = state.index === index;
+
+          const onPress = () => {
+            if (focused) {
+              return;
+            }
+            navigateToTab(route.key);
+          };
+
+          return (
+            <Pressable
+              key={route.key}
+              accessibilityRole="tab"
+              accessibilityState={focused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel || item.label}
+              onPress={onPress}
+              style={styles.tabItem}
+            >
+              <View style={[styles.tabIcon, focused && styles.tabIconActive]}>
+                <Ionicons
+                  name={item.icon}
+                  size={focused ? 23 : 21}
+                  color={focused ? Colors.white : Colors.textSecondary}
+                />
+              </View>
+              <Text style={[styles.tabLabel, focused && styles.tabLabelActive]} numberOfLines={1}>
+                {item.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
 
 export default function MainTabsLayout() {
   return (
     <Tabs
+      tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={{
         headerStyle: {
           backgroundColor: Colors.forestGreen,
         },
         headerTintColor: Colors.white,
-        tabBarActiveTintColor: Colors.primaryGreen,
-        tabBarInactiveTintColor: Colors.textMuted,
-        tabBarStyle: {
-          backgroundColor: Colors.white,
-          borderTopColor: Colors.borderLight,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
-        },
       }}
     >
       <Tabs.Screen
@@ -28,9 +82,6 @@ export default function MainTabsLayout() {
         options={{
           title: 'Accueil',
           headerTitle: 'MABOUNDZA',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="home-outline" size={22} color={typeof color === 'string' ? color : Colors.primaryGreen} />
-          ),
         }}
       />
       <Tabs.Screen
@@ -38,11 +89,6 @@ export default function MainTabsLayout() {
         options={{
           title: 'Scanner',
           headerTitle: 'Scanner botanique',
-          tabBarIcon: ({ color }) => (
-            <View style={styles.scannerBadge}>
-              <Ionicons name="camera-outline" size={22} color={typeof color === 'string' ? color : Colors.primaryGreen} />
-            </View>
-          ),
         }}
       />
       <Tabs.Screen
@@ -50,9 +96,6 @@ export default function MainTabsLayout() {
         options={{
           title: 'Encyclopédie',
           headerTitle: 'Flore du Gabon',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="book-outline" size={22} color={typeof color === 'string' ? color : Colors.primaryGreen} />
-          ),
         }}
       />
       <Tabs.Screen
@@ -60,9 +103,6 @@ export default function MainTabsLayout() {
         options={{
           title: 'Mon Herbier',
           headerTitle: 'Herbier Numérique',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="leaf-outline" size={22} color={typeof color === 'string' ? color : Colors.primaryGreen} />
-          ),
         }}
       />
       <Tabs.Screen
@@ -70,9 +110,6 @@ export default function MainTabsLayout() {
         options={{
           title: 'Profil',
           headerTitle: 'Mon Profil',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="person-outline" size={22} color={typeof color === 'string' ? color : Colors.primaryGreen} />
-          ),
         }}
       />
     </Tabs>
@@ -80,15 +117,63 @@ export default function MainTabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  scannerBadge: {
-    width: 44,
-    height: 44,
+  tabBarOuter: {
+    paddingHorizontal: 16,
+    paddingTop: 25,
+    backgroundColor: 'transparent',
+  },
+  tabBar: {
+    height: 62,
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    backgroundColor: Colors.white,
     borderRadius: 22,
-    backgroundColor: Colors.lightGreen,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    shadowColor: Colors.forestGreen,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 7,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: 8,
+  },
+  tabIcon: {
+    position: 'absolute',
+    top: 5,
+    width: 31,
+    height: 31,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -10,
-    borderWidth: 2,
-    borderColor: Colors.primaryGreen,
+  },
+  tabIconActive: {
+    top: -25,
+    width: 55,
+    height: 55,
+    borderRadius: 28,
+    backgroundColor: Colors.primaryGreen,
+    borderWidth: 5,
+    borderColor: Colors.naturalBeige,
+    shadowColor: Colors.forestGreen,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.22,
+    shadowRadius: 5,
+    elevation: 8,
+  },
+  tabLabel: {
+    maxWidth: '100%',
+    paddingHorizontal: 2,
+    color: Colors.textSecondary,
+    fontSize: 10,
+    lineHeight: 13,
+    textAlign: 'center',
+  },
+  tabLabelActive: {
+    color: Colors.forestGreen,
+    fontWeight: '700',
   },
 });

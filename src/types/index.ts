@@ -117,6 +117,38 @@ export interface Plant {
   uses?: PlantUse[];
 }
 
+export interface GbifSpeciesRecord {
+  id: string;
+  gbif_species_key: number;
+  scientific_name: string;
+  family_name?: string;
+  genus?: string;
+  authorship?: string;
+  common_name?: string;
+  common_name_language?: string;
+  occurrence_count: number;
+  source_url: string;
+  cached_at: string;
+  local_image_uri?: string;
+  image_credit?: string;
+  image_license?: string;
+  image_source_url?: string;
+  photo_checked_at?: string;
+  photo_error?: string;
+  photos?: GbifSpeciesPhoto[];
+}
+
+export interface GbifSpeciesPhoto {
+  id: string;
+  species_id: string;
+  remote_url: string;
+  local_image_uri: string;
+  image_credit: string;
+  image_license: string;
+  image_source_url: string;
+  cached_at: string;
+}
+
 export interface HerbariumEntry {
   id: string;
   user_id: string;

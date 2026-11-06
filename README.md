@@ -9,7 +9,7 @@ MABOUNDZA est une application mobile destinée à documenter et préserver la fl
 ## 📸 Fonctionnalités Clés
 
 1. **Scanner** : Prenez une photo avec la caméra ou choisissez-en une dans la galerie. L’observation est enregistrée automatiquement dans l’herbier. L’identification botanique n’est pas encore configurée.
-2. **Encyclopédie botanique** : Affiche les fiches vérifiées ajoutées à Firebase et mises en cache localement.
+2. **Encyclopédie botanique** : Affiche les fiches vérifiées ajoutées à Firebase et mises en cache localement. Un filtre distinct « Observations GBIF » permet aussi de consulter hors ligne jusqu’à 1 000 taxons signalés au Gabon, clairement identifiés comme non vérifiés par MABOUNDZA.
 3. **Informations de sécurité** : Affiche les précautions renseignées dans les fiches disponibles ; celles-ci doivent être validées par des sources qualifiées.
 4. **Herbier numérique personnel** : Enregistre automatiquement les photos sur l’appareil et synchronise les fiches d’observation et les photos lorsque la connexion est disponible.
 5. **Mode Petit Botaniste** : Interface ludique avec des quiz adaptés aux enfants (sans accès aux posologies médicales).
@@ -94,9 +94,33 @@ EXPO_PUBLIC_FIREBASE_APP_ID=...
 
 Les anciens scripts SQL de `supabase-legacy/` ne sont pas exécutés par Firebase. Ils sont conservés comme référence : convertissez/exportez les autres données voulues en JSON avant de les importer. Les chemins utilisés par l'application sont `/profiles/{uid}`, `/user_roles/{uid}`, `/subscriptions/{uid}`, `/scans/{uid}`, `/herbarium_entries/{uid}` et `/contributions/{uid}`.
 
+### Observations GBIF hors ligne
+L’application récupère progressivement jusqu’à 1 000 noms d’espèces associés à des signalements de plantes au Gabon (observations et spécimens) depuis l’API GBIF, puis les conserve dans SQLite. Dès que l’application détecte une connexion Internet, elle enchaîne automatiquement des lots de 30 espèces tant qu’elle reste ouverte et qu’il reste des données à récupérer. Jusqu’à 3 photos par espèce sont recherchées et téléchargées pour la consultation hors ligne uniquement quand leur licence permet la réutilisation (CC0, CC BY ou CC BY-SA) et que les crédits nécessaires sont disponibles; les images CC BY-NC, CC BY-ND et sans licence explicite sont exclues. L’auteur, la licence et le lien de la source sont conservés avec chaque image. Les fichiers de plus de 5 Mo sont rejetés; les échecs réseau sont retentés avec un délai progressif. Les deux catégories de l’encyclopédie sont « Fiches vérifiées » et « Observations GBIF »; les filtres de langue ou d’usage ne sont pas encore disponibles, car ces informations ne sont pas dans les données importées. Cette collection est séparée des fiches vérifiées Firebase et ne doit pas servir de source d’informations médicinales. Les signalements et noms peuvent comporter des erreurs. L’exécution des tâches périodiques nécessite une compilation native (non disponible dans Expo Go).
+
 ---
 
 ## 📱 Compilation & Déploiement
+
+### Mises à jour sans réinstallation (EAS Update)
+Les builds `preview` et `production` utilisent EAS Update. Une première compilation avec cette configuration est nécessaire; après installation, les changements JavaScript, styles et contenus compatibles peuvent être publiés sans réinstaller l’application. Les changements natifs (par exemple une nouvelle bibliothèque native ou des permissions) nécessitent une nouvelle build. La politique de runtime `fingerprint` empêche une mise à jour incompatible avec les composants natifs de l’application.
+
+Configurez dans EAS les variables `EXPO_PUBLIC_FIREBASE_*` et `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` pour les environnements `preview` et `production`. Pour créer la build Android de test à installer une fois :
+```bash
+npx eas build --platform android --profile preview
+```
+
+Après avoir installé cette build, publiez une mise à jour de test sur son canal :
+```bash
+npx eas update --channel preview --message "Description de la mise à jour" --environment preview
+```
+
+L’application télécharge la mise à jour compatible et l’applique au prochain lancement. N’envoyez pas de mise à jour `production` avant de l’avoir validée sur `preview`.
+
+Pour le développement natif avec un serveur local, compilez le profil `development`, puis lancez :
+```bash
+npx eas build --platform android --profile development
+npx expo start --dev-client
+```
 
 ### Lancement en Mode Développement
 ```bash
