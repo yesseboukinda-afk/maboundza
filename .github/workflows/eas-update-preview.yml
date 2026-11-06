@@ -33,9 +33,9 @@ jobs:
       - name: Verify Expo token
         run: test -n "$EXPO_TOKEN"
         env:
-          EXPO_TOKEN: ${{ secrets.expo_token }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Publish EAS Update
         run: npx eas-cli update --channel preview --message "GitHub main: ${{ github.sha }}" --environment preview --non-interactive
         env:
-          EXPO_TOKEN: ${{ secrets.expo_token }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
