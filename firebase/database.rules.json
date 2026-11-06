@@ -1,0 +1,47 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "plants": {
+      ".read": true
+    },
+    "profiles": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "user_roles": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && (!data.exists() || data.child('role').val() === newData.child('role').val())",
+        ".validate": "newData.hasChildren(['role', 'created_at']) && (newData.child('role').val() === 'standard' || newData.child('role').val() === 'child' || newData.child('role').val() === 'parent' || newData.child('role').val() === 'teacher' || newData.child('role').val() === 'tradipractitioner' || newData.child('role').val() === 'expert_botanist' || newData.child('role').val() === 'farmer')"
+      }
+    },
+    "subscriptions": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid"
+      }
+    },
+    "scans": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "herbarium_entries": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "contributions": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$contributionId": {
+          ".write": "auth != null && auth.uid === $uid && newData.child('contributor_id').val() === auth.uid"
+        }
+      }
+    }
+  }
+}
